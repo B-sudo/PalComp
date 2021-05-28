@@ -9,15 +9,15 @@
 void InsertSort(int *a, int start, int end)
 {
 	assert(end >= start);
-	int i,j,hook;
-	for(i = start + 1; i <= end ;i++)
+	int i, j, hook;
+	for (i = start + 1; i <= end; i++)
 	{
 		hook = a[i];
-		for(j = i - 1; j >= start; j--)
+		for (j = i - 1; j >= start; j--)
 		{
 			if (hook < a[j])
 			{
-				a[j+1]=a[j];
+				a[j+1] = a[j];
 				if (j == start)
 				{
 					a[j] = hook;
@@ -25,22 +25,23 @@ void InsertSort(int *a, int start, int end)
 				}
 			}
 			else
-			{	
-				a[j+1]=hook;
+			{
+				a[j+1] = hook;
 				break;
 			}
 		}
-	}	
+	}
 }
-
 void main()
 {
 	int a[N], sam[P*P], keyelem[P-1] ,count[P]={0}, fina[N];
 	int posl[P][P]={-1}, posr[P][P]={-1};
 	int i;
 	int start, end;
+	struct timespec tstart, tend;
 	for (i = 0; i < N; i++)
 		a[i] = rand() % 100;
+	clock_gettime(CLOCK_MONOTONIC, &tstart);
 	omp_set_num_threads(P);	
 	#pragma omp parallel private(start, end) shared(a, sam, keyelem, count, posl, posr, fina)
 	{
@@ -116,8 +117,11 @@ void main()
 		}
 		InsertSort(fina, base, k - 1);
 	}
+	
+	clock_gettime(CLOCK_MONOTONIC, &tend);
 
 	for (i = 0; i < N; i++)
 		printf("%d\t", fina[i]);
+	printf("\nTime: %lfs\n", (tend.tv_sec - tstart.tv_sec) + (tend.tv_nsec - tstart.tv_nsec)/1000000000.0);
 
 }
