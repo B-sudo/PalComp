@@ -19,6 +19,7 @@ void generateMatrix(float * a, float *b)
 
 __global__ static void CUDAkernal(const float *a ,const float *b, float *c, int n)
 {
+	int i;
 	//block threadID
 	const int tid = threadIdx.x;
 	//blockID
@@ -34,12 +35,13 @@ __global__ static void CUDAkernal(const float *a ,const float *b, float *c, int 
 		{ 
 			t += a[row * n + i] * b[i * n + column];
 		}
+		c[row*n+column] = t;
 	}
 }
 
 int main()
 {
-	float *a, *b, *c, *d;
+	float *a, *b, *c;
 	float *cuda_a, * cuda_b, * cuda_c;
 	int n = MATRIX_SIZE;
 
@@ -47,12 +49,11 @@ int main()
 	a = (float*)malloc(sizeof(float) * n * n);
 	b = (float*)malloc(sizeof(float) * n * n);
 	c = (float*)malloc(sizeof(float) * n * n);
-	d = (float*)malloc(sizeof(float) * n * n);
 
 	//GPU alloc
 	cudaMalloc((void**)&cuda_a, sizeof(float) * n * n);
 	cudaMalloc((void**)&cuda_b, sizeof(float) * n * n);
-	cudaMalloc((void**)&cuda_c, sizeof(flaot) * n * n);
+	cudaMalloc((void**)&cuda_c, sizeof(float) * n * n);
 
 	generateMatrix(a, b);
 
