@@ -4,7 +4,7 @@
 #include<string.h>
 #include<assert.h>
 #include"mpi.h"
-#define N 27
+#define N 1000
 
 int *L, *R;
 
@@ -52,7 +52,9 @@ void main(int argc, char * argv[])
         int * posl, * posr, * count,* recv, * finabias;
 	int * FinalArrayLength, * FinalArrayBias, * FinalArray;
 	MPI_Status status;
+	struct timespec Tstart, Tend;
 
+	clock_gettime(CLOCK_MONOTONIC, &Tstart);
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &P);
 	MPI_Comm_rank(MPI_COMM_WORLD, &id);
@@ -62,7 +64,7 @@ void main(int argc, char * argv[])
 	end = (id + 1) * (N/P) - 1;
 	array = (int *)malloc(sizeof(int) * (end - start + 1));
 	for (i = 0; i < end - start + 1; i++)
-		array[i] = (rand() % 400)*(id+1) % 97;
+		array[i] = (rand() % 4000)*(id+1) % 997;
 	//Sort locally
 	MergeSort(array, 0, end - start);
 
@@ -170,10 +172,12 @@ void main(int argc, char * argv[])
 			FinalArray[i] = fina[i];
 		for (i = 1; i < P; i++)
 			MPI_Recv(FinalArray + FinalArrayBias[i], FinalArrayLength[i], MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+		clock_gettime(CLOCK_MONOTONIC, &Tend);
 		printf("FINAL RESULT:\n");
 		for (i = 0; i < N; i++)
 			printf("%d\t", FinalArray[i]);
 		printf("\n");
+		printf("Time is %lfs\n", (Tend.tv_sec-Tstart.tv_sec)+(Tend.tv_nsec-Tstart.tv_nsec)/1000000000.0);
 	}
 	MPI_Finalize();
 }
